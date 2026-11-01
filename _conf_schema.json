@@ -40,5 +40,17 @@
     "type": "int",
     "default": 600,
     "hint": "机器人最近一次和某人说话（含生成中）之后多久内，对方的“你……”和图片被视为继续对话"
+  },
+  "farewell_enabled": {
+    "description": "对话收束（防晚安循环）",
+    "type": "bool",
+    "default": true,
+    "hint": "对话自然收尾时她自己标记结束，之后对方再发“晚安/拜拜/嗯嗯”这类道别回声不再回复；有实质内容的新消息照常接话"
+  },
+  "farewell_cooldown_minutes": {
+    "description": "收束后忽略回声的时长",
+    "type": "int",
+    "default": 10,
+    "hint": "分钟；期间只忽略纯道别回声"
   }
 }
