@@ -1,0 +1,44 @@
+{
+  "enabled": {
+    "description": "启用连续对话接话",
+    "type": "bool",
+    "default": true,
+    "hint": "依赖 group_chat_plus 的注意力/概率系统；未安装 GCP 时自动停用"
+  },
+  "markers": {
+    "description": "呼唤标记词",
+    "type": "string",
+    "default": "你,您,在吗",
+    "hint": "消息包含这些词且发送者注意力达标时，视为在跟机器人说话；逗号分隔"
+  },
+  "attention_threshold": {
+    "description": "注意力达标阈值",
+    "type": "float",
+    "default": 0.3,
+    "hint": "发送者注意力分数达到该值（最近和机器人互动过）时才启用第二人称判定"
+  },
+  "poke_window_seconds": {
+    "description": "戳一戳有效窗口（秒）",
+    "type": "int",
+    "default": 120,
+    "hint": "戳过机器人后多久内的消息视为在跟它说话"
+  },
+  "boost_probability": {
+    "description": "提升后的概率",
+    "type": "float",
+    "default": 0.98,
+    "hint": "判定为呼唤时把读空气概率临时提升到该值，由 GCP 正常接话"
+  },
+  "boost_duration_seconds": {
+    "description": "提升持续时长（秒）",
+    "type": "int",
+    "default": 120,
+    "hint": "提升只对紧随其后的消息生效，超时恢复原有概率"
+  },
+  "interaction_window_seconds": {
+    "description": "连续对话互动窗口（秒）",
+    "type": "int",
+    "default": 600,
+    "hint": "机器人最近一次和某人说话（含生成中）之后多久内，对方的“你……”和图片被视为继续对话"
+  }
+}

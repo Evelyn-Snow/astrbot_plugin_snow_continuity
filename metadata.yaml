@@ -1,0 +1,9 @@
+name: astrbot_plugin_snow_continuity
+display_name: 连续对话接话
+desc: 连续对话中的追问和戳一戳后的消息被确定性回复，不再被读空气概率吞掉
+help: 和机器人互动过后，紧接着用“你……”说话或先戳后问，都会得到回复
+version: v0.2.1
+repo: https://github.com/Evelyn-Snow/astrbot_plugin_snow_continuity
+author: Evelyn-Snow
+support_platforms:
+  - aiocqhttp
