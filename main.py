@@ -48,6 +48,7 @@ class SnowContinuity(Star):
         # umo -> (收束截止时间, 收束对象 sender)：道别后对回声静默
         self._closed: dict[str, tuple[float, str]] = {}
         self._last_sender: dict[str, str] = {}
+        self._turn_count: dict[str, int] = {}
 
     # ---------------- 配置 ----------------
     def _enabled(self) -> bool:
@@ -119,6 +120,10 @@ class SnowContinuity(Star):
                 self._last_sender.pop(next(iter(self._last_sender)))
         if not bool(self.conf.get("farewell_enabled", True)):
             return
+        # 收尾指引只在「可能收尾」时注入，省掉每轮 160 字的固定开销：
+        # 用户消息含道别词，或本会话已聊够轮数（每 N 轮补一次提醒）。
+        if not self._should_hint_close(event, umo):
+            return
         prompt = str(getattr(req, "system_prompt", "") or "")
         if CLOSE_MARK in prompt:
             return
@@ -128,6 +133,23 @@ class SnowContinuity(Star):
             "[[对话结束]]。除此之外（对话还在进行、刚开头、或对方在提新话题）绝对不要输出这个标记。"
             "输出后系统会替你收尾，对方再发简单的道别也不会打扰你。这段说明不要在回复中提到。"
         )
+
+    _CLOSE_WORDS = (
+        "晚安", "睡了", "睡了睡", "睡觉", "下线", "拜拜", "再见", "回见", "明天见",
+        "先不聊", "不聊了", "去休息", "要睡了", "先撤", "溜了", "退下了",
+    )
+
+    def _should_hint_close(self, event: AstrMessageEvent, umo: str) -> bool:
+        """是否需要注入收尾指引：命中道别词，或每 N 轮补一次（保证长对话也能收尾）。"""
+        text = str(getattr(event, "message_str", "") or "")
+        if any(word in text for word in self._CLOSE_WORDS):
+            return True
+        turn = self._turn_count.get(umo, 0) + 1
+        self._turn_count[umo] = turn
+        if len(self._turn_count) > 100:
+            self._turn_count.pop(next(iter(self._turn_count)))
+        every = max(1, int(self.conf.get("farewell_hint_every_turns", 5)))
+        return turn % every == 0
 
     @filter.after_message_sent()
     async def record_reply_sent(self, event: AstrMessageEvent):

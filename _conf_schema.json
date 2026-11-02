@@ -52,5 +52,11 @@
     "type": "int",
     "default": 10,
     "hint": "分钟；期间只忽略纯道别回声"
+  },
+  "farewell_hint_every_turns": {
+    "description": "收尾提醒间隔（轮）",
+    "type": "int",
+    "default": 5,
+    "hint": "收尾指引只在用户说到晚安/再见等道别词时注入，此外每 N 轮补一次；设为 0 则只在道别词时注入（最省 token）"
   }
 }
