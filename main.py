@@ -104,6 +104,8 @@ class SnowContinuity(Star):
     @filter.on_llm_request()
     async def record_reply_in_flight(self, event: AstrMessageEvent, req):
         """回复生成开始：记录发送者并注入收束指引；互动记录不含网页测试台。"""
+        if not self._enabled():
+            return
         self._record_sender_and_hint(event, req)
         if event.get_platform_name() == "webchat":
             return
@@ -148,12 +150,16 @@ class SnowContinuity(Star):
         self._turn_count[umo] = turn
         if len(self._turn_count) > 100:
             self._turn_count.pop(next(iter(self._turn_count)))
-        every = max(1, int(self.conf.get("farewell_hint_every_turns", 5)))
+        every = int(self.conf.get("farewell_hint_every_turns", 5))
+        if every <= 0:
+            return False
         return turn % every == 0
 
     @filter.after_message_sent()
     async def record_reply_sent(self, event: AstrMessageEvent):
         """回复已发送：刷新最近互动时间。"""
+        if not self._enabled():
+            return
         if event.get_platform_name() == "webchat":
             return
         self._interactions[self._key(event)] = time.time()
@@ -163,6 +169,8 @@ class SnowContinuity(Star):
     @filter.on_decorating_result(priority=-1200)
     async def close_conversation(self, event: AstrMessageEvent):
         """响应里带结束标记 → 剥掉标记、记下收束期；之后对方的道别回声不再接。"""
+        if not self._enabled():
+            return
         if not bool(self.conf.get("farewell_enabled", True)):
             return
         result = event.get_result()
@@ -195,6 +203,8 @@ class SnowContinuity(Star):
     @filter.event_message_type(filter.EventMessageType.ALL, priority=(1 << 31) - 4)
     async def suppress_farewell_echo(self, event: AstrMessageEvent):
         """收束期内，同一对象发来的纯道别回声直接忽略（实质内容照常回复）。"""
+        if not self._enabled():
+            return
         if not bool(self.conf.get("farewell_enabled", True)):
             return
         umo = str(event.unified_msg_origin or "")
